@@ -1,40 +1,39 @@
-# 大気圧・風速マップ（Atmosphere Pressure & Wind Map）
+# WeatherLayer Particle Display Map
 
-NOAA Global Forecast System（GFS）の大気圧・風速データを時系列で可視化するReact TypeScriptウェブアプリケーションです。MapLibre GLとPMTilesを使用して、24時間の海面気圧データをカラーマップと等圧線で表示し、WeatherLayers.glによる風速パーティクルアニメーションと組み合わせることで、大気の動きを包括的に可視化します。
+WeatherLayers GLライブラリを使用した、インタラクティブな風のパーティクル可視化マップアプリケーションです。WeatherLayers GLのVector画像に準拠したPNG画像をドラッグ&ドロップで読み込み、リアルタイムでパーティクルアニメーションを表示できます。
 
-## 主な機能
+## 🌟 主な機能
 
-- **24時間時系列可視化**: 2025年11月1日の00:00-23:00（UTC）の気圧・風速データを1時間ごとに表示
-- **大気圧可視化**: 
-  - カラーレリーフマップ（980-1040 hPa の圧力範囲で線形変化）
-  - ベクター等圧線（20 hPa間隔でメジャー等圧線を強調表示）
-- **風速可視化**:
-  - リアルタイムパーティクルアニメーション（5000パーティクル）
-  - WeatherLayers.glによる高性能レンダリング
-  - 時刻連動による風向・風速の時系列変化表示
-- **インタラクティブ操作**:
-  - タイムスライダーによる気圧・風速データの同期制御
-  - 等圧線クリックで詳細情報ポップアップ表示
-  - レスポンシブデザイン（デスクトップ/タブレット/モバイル対応）
-- **高性能データ配信**: PMTilesフォーマットによる効率的なタイル配信
+- **ドラッグ&ドロップ対応**: PNG画像を地図上に直接ドロップして読み込み
+- **リアルタイムパラメータ調整**: スライダーを使ってパーティクルの表示を即座に調整
+- **柔軟な表示範囲設定**: 緯度経度範囲を指定して特定地域にフォーカス
+- **レスポンシブデザイン**: デスクトップ・モバイル両対応
+- **ダークモード対応**: ユーザーのシステム設定に自動対応
 
-## デモ
+## 🚀 デモ
 
-[Live Demo](https://hirofumikanda.github.io/weatherlayer-particle-display-map)
+https://hirofumikanda.github.io/weatherlayer-particle-display-map/
 
-## データソース
+## 📋 調整可能なパラメータ
 
-- **NOAA Global Forecast System (GFS)**: アメリカ海洋大気庁の全球予報システム
-- **データ期間**: 2025年11月1日 00:00-23:00 UTC
-- **空間解像度**: グローバルカバレッジ
-- **時間解像度**: 1時間間隔（24時間分）
-- **データフォーマット**: 
-  - 気圧データ: PMTiles（terrainRGB + ベクター）
-  - 風速データ: PNG画像（U/V成分合成、-40〜40 m/s範囲）
+- **パーティクル数**: 表示するパーティクルの総数 (1,000-20,000)
+- **最大寿命**: パーティクルの寿命フレーム数 (1-50)
+- **速度係数**: 風速に対するパーティクル移動速度の倍率 (1-1,000)
+- **線の太さ**: パーティクルトレイルの描画幅 (0.5-10.0)
+- **最小値・最大値**: 風速データの正規化範囲 (-128～128)
+- **緯度経度範囲**: パーティクル表示の地理的範囲
 
-## インストールと起動
+## 🛠️ 技術スタック
 
-### セットアップ手順
+- **React 19** - UIフレームワーク
+- **TypeScript** - 型安全な開発
+- **MapLibre GL** - 高性能マップレンダリング
+- **DeckGL** - WebGLベースのデータ可視化
+- **WeatherLayers GL** - 気象データ可視化ライブラリ
+- **Vite** - 高速開発環境
+- **GitHub Pages** - 自動デプロイ
+
+## 📦 インストール
 
 ```bash
 # リポジトリをクローン
@@ -44,43 +43,42 @@ cd weatherlayer-particle-display-map
 # 依存関係をインストール
 npm install
 
-# 開発サーバーを起動
+# 開発サーバーを起動 (http://localhost:5173)
 npm run dev
 ```
 
-開発サーバーが起動したら、ブラウザで `http://localhost:5173` にアクセスしてください。
+## 📖 使い方
 
-## プロジェクト構造
+1. **アプリケーションを開く**: ブラウザでデモサイトまたはローカル開発サーバーにアクセス
+2. **PNGを読み込む**: WeatherLayers GLのVector画像形式のPNG画像を地図上にドラッグ&ドロップ
+3. **パラメータを調整**: 左上のコントロールパネルでパーティクルの表示を調整
+
+## 📁 プロジェクト構造
 
 ```
 src/
 ├── components/
-│   ├── MapView.tsx          # メインマップコンポーネント
-│   └── TimeSlider.tsx       # 時間制御スライダー
+│   ├── MapView.tsx           # メインマップコンテナ
+│   └── ParticleControls.tsx  # パラメータ調整UI
 ├── hooks/
-│   └── useMap.ts           # 地図初期化・制御ロジック（風速レイヤー管理含む）
+│   └── useMap.ts            # マップとパーティクル管理
 ├── styles/
-│   ├── map.css             # 地図スタイル
-│   ├── popup.css           # ポップアップスタイル
-│   └── timeSlider.css      # タイムスライダースタイル
-├── App.tsx                 # ルートコンポーネント
-└── main.tsx               # エントリーポイント
+│   ├── map.css              # マップスタイル
+│   └── particleControls.css # コントロールUIスタイル
+└── main.tsx                 # アプリケーションエントリーポイント
 
 public/
-├── data/                   # PMTilesデータファイル
-│   ├── prmsl_hpa_terrainrgb_20251101_XXX.pmtiles  # terrainRGB形式の気圧データ
-│   └── prmsl_isobar_20251101_XXX.pmtiles          # 等圧線ベクターデータ
-├── img/                    # 風速データファイル
-│   └── wind_20251101_XXX.png                      # 時間別風速U/V成分画像
-├── styles/
-│   └── style.json          # MapLibreスタイル定義
-└── font/                   # Webフォント
+└── styles/
+    └── style.json           # MapLibreスタイル定義
 ```
 
-## ライセンス
+## 🎯 対応データ形式
+
+- **ファイル形式**: PNG画像
+- **データ形式**: WeatherLayers GL Vector画像形式
+- **チャンネル**: R（東西ベクトル成分値）、G（南北ベクトル成分値）
+- 詳細はWeatherLayers GLの[supported-data-formats](https://docs.weatherlayers.com/weatherlayers-gl/data-sources#supported-data-formats)を参照
+
+## 📄 ライセンス
 
 このプロジェクトはMITライセンスの下で公開されています。
-
-## 関連リンク
-
-- [NOAA GFS Data](https://registry.opendata.aws/noaa-gfs-bdp-pds/)

@@ -1,131 +1,98 @@
-# Atmosphere Pressure Map - AI Assistant Instructions
+# WeatherLayer Particle Display Map - AI Coding Instructions
 
 ## Project Overview
-This is a React TypeScript web application that visualizes 24-hour time-series atmospheric pressure data using MapLibre GL. The app displays NOAA GFS pressure data as both color-relief terrain maps and isobar contour lines using PMTiles format, with an interactive time slider for temporal navigation.
+Interactive weather visualization app using drag-and-drop PNG wind data files to display animated particle layers on MapLibre GL maps. Built with React, TypeScript, and specialized weather visualization libraries.
 
 ## Architecture & Data Flow
 
 ### Core Components
-- **App.tsx** → **MapView.tsx** → **TimeSlider.tsx** + **useMap.ts**: Component hierarchy with time control
-- **useMap.ts**: Single source of truth for map initialization, layer visibility control, and isobar interaction
-- **TimeSlider.tsx**: Interactive time control component with responsive design
-- **style.json**: MapLibre style definition with 24 time-based pressure visualization layers
+- **useMap hook** (`src/hooks/useMap.ts`): Central state management for map, DeckGL overlay, and particle parameters
+- **MapView** (`src/components/MapView.tsx`): Main container with drag-and-drop file handling and UI state
+- **ParticleControls** (`src/components/ParticleControls.tsx`): Real-time parameter adjustment sliders
 
-### Data Sources & Time Series Structure
-- **prmsl_hpa_terrainrgb_20251101_XXX.pmtiles**: 24 hourly pressure datasets (000-023) in terrainRGB format (980-1040 hPa range)
-- **prmsl_isobar_20251101_XXX.pmtiles**: 24 hourly vector isobar datasets with `prmsl` property
-- Data sourced from NOAA Global Forecast System (GFS) for 2025/11/01
-- Each dataset represents one hour of forecast data (UTC 00:00-23:00)
+### Key Data Flow
+1. User drops PNG → `fileToTextureData()` converts File to WeatherLayers TextureData format
+2. `updateWindLayer()` stores image in `currentImageRef` and creates initial ParticleLayer
+3. Parameter changes trigger `updateParticleParams()` → recreates layer with new settings
+4. DeckGL overlay renders particles on MapLibre GL map
 
-### Key Technical Patterns
+## Critical Patterns
 
-#### PMTiles Integration
+### WeatherLayers Integration
+- Use `WeatherLayers.ParticleLayer` from `weatherlayers-gl` library
+- Custom `fileToTextureData()` function: File → ImageBitmap → Canvas → RGBA pixel data → TextureData format
+- TextureData structure: `{ data: Uint8ClampedArray, width: number, height: number, bandsCount: 4 }`
+
+### Parameter State Management
 ```typescript
-// Protocol registration is required in useMap.ts
-const protocol = new Protocol();
-maplibregl.addProtocol("pmtiles", protocol.tile);
+// ParticleParams interface defines all adjustable properties
+interface ParticleParams {
+  numParticles: number;
+  maxAge: number; 
+  speedFactor: number;
+  width: number;
+  imageUnscale: [number, number]; // min, max wind speed scaling
+  bounds: [number, number, number, number]; // [west, south, east, north]
+}
 ```
-- URLs use `pmtiles://` protocol in style.json
-- Base path matches `vite.config.ts` base setting: `/weatherlayer-particle-display-map/`
 
-#### Time-Series Layer Management
-- 24 layer groups: each hour has pressure-relief, isobar, and isobar-label layers
-- Layer naming: `pressure-relief_XXX`, `isobar_XXX`, `isobar-label_XXX` (XXX = 000-023)
-- Visibility controlled via `setTimeLayerVisibility()` function in useMap.ts
-- Only one time slice visible at a time; all others set to `visibility: 'none'`
+### Ref-based Architecture
+- `currentImageRef`: Stores processed image data for parameter updates without re-processing
+- `currentParamsRef`: Maintains parameter state for layer recreation
+- `deckOverlayRef`: Direct access to DeckGL overlay for layer updates
 
-#### Interactive Isobar Features
-- Click handlers on all isobar layers show pressure popup with time information
-- Cursor changes to pointer on hover over isobars
-- Popup displays: pressure value (hPa), current time (UTC format)
-- Event handlers dynamically attached to all 24 isobar layers on map load
+## Development Commands
 
-#### Style Layer Structure (per time slice)
-1. **mono**: Background raster tiles from MIERUNE (shared)
-2. **pressure-relief_XXX**: Color-coded pressure visualization using `color-relief` type
-3. **isobar_XXX**: Vector line layer with conditional styling (20 hPa intervals = thick lines)
-4. **isobar-label_XXX**: Symbol layer for pressure values on major isobars only
-
-#### Pressure Color Mapping
-- Blue (980 hPa) → White (1013 hPa) → Red (1040 hPa)
-- Uses linear interpolation with `["elevation"]` for terrainRGB data
-- Property access: `["get", "prmsl"]` for vector isobar data
-
-## Development Workflows
-
-### Local Development
 ```bash
-npm run dev        # Vite dev server
-npm run build      # TypeScript + Vite build
-npm run preview    # Preview built app
+npm run dev          # Vite dev server with HMR
+npm run build        # TypeScript compilation + Vite build
+npm run deploy       # Build + deploy to GitHub Pages
+npm run preview      # Preview production build locally
 ```
 
-### Deployment
-```bash
-npm run deploy     # Builds and deploys to GitHub Pages
-```
-- Configured for `hirofumikanda.github.io/weatherlayer-particle-display-map`
-- Base path in `vite.config.ts` must match repository name
+## File Conventions
 
-## Project-Specific Conventions
+### Import Patterns
+- Use `type` imports for interfaces: `import type { ParticleParams } from "./ParticleControls"`
+- WeatherLayers as namespace: `import * as WeatherLayers from "weatherlayers-gl"`
+- DeckGL MapboxOverlay: `import { MapboxOverlay } from "@deck.gl/mapbox"`
 
-### Time Control Implementation
-- State managed in MapView component: `currentTime` (0-23)
-- Time changes trigger layer visibility updates via `setTimeLayerVisibility()`
-- TimeSlider component handles UI interaction and responsive design
-- Time format: UTC hours displayed as "UTC時刻: 2025/11/01 XX:00"
+### Styling
+- CSS Modules pattern: component-specific CSS files in `src/styles/`
+- Inline styles for dynamic/conditional styling
+- Dark mode support via `@media (prefers-color-scheme: dark)`
 
-### Map Configuration
-- Default center: `[139.8, 35.9]` (Japan region)
-- Zoom range: 0-18, default zoom: 2
-- Hash routing enabled for shareable URLs
-- Interactive popup system for pressure value display
+### Public Assets
+- MapLibre style JSON: `public/styles/style.json` (MIERUNE mono tiles)
+- Font glyphs: `public/font/` directory structure for multi-language support
+- Static images: `public/img/` (currently unused - drag-and-drop replaces static assets)
 
-### Data Property Names
-- Isobar pressure values: `prmsl` (not `pressure`)
-- 20 hPa major intervals: Use modulo `["%", ["get", "prmsl"], 20]` for styling
-- Time series filename pattern: `_YYYYMMDD_XXX.pmtiles` where XXX = 000-023
+## Integration Points
 
-### Responsive Design Patterns
-- TimeSlider uses CSS media queries for mobile/tablet/desktop layouts
-- Mobile: larger touch targets, simplified time markers
-- Dark mode support via `prefers-color-scheme: dark`
-- Touch device specific styling with `hover: none` and `pointer: coarse`
+### MapLibre + DeckGL
+- Initialize MapLibre first, then add DeckGL overlay on `map.on('load')`
+- Use `interleaved: true` for proper layer ordering
+- Cast overlay as `any` when adding: `map.addControl(deckOverlay as any)`
 
-### File Organization
-- Styles in `public/styles/` (not `src/`)
-- PMTiles data in `public/data/`
-- Custom CSS modules in `src/styles/`
-- Fonts served from `public/font/` with specific directory structure
+### File Processing Pipeline
+- Accept only PNG files: `file.type === 'image/png'`
+- Convert to ImageBitmap for efficient pixel access
+- Extract RGBA data via Canvas 2D context
+- Format as WeatherLayers TextureData with 4 bands (RGBA)
 
-## Critical Dependencies
-- **maplibre-gl**: Map rendering engine
-- **pmtiles**: Efficient tile format for large datasets
-- **weatherlayers-gl**: Weather visualization utilities
-- **@deck.gl/mapbox**: Advanced visualization layers (available but not used yet)
+## Error Handling Patterns
+- Async operations wrapped in try-catch with user-friendly error messages
+- File validation before processing (type, count)
+- Canvas context creation validation
+- Layer update failures logged but don't crash app
 
-## Common Tasks
+## UI State Management
+- `hasParticleLayer`: Controls visibility of parameter controls and instruction text
+- `isDragOver`: Visual feedback during drag operations
+- `isLoading`: Progress indication during file processing
+- Conditional rendering based on these states
 
-### Time-Series Data Management
-- Add new time slice: Update style.json sources (both terrainRGB and vector)
-- Add corresponding layers for pressure-relief, isobar, and isobar-label
-- Update `setTimeLayerVisibility()` loop range in useMap.ts
-- Ensure all new isobar layers get event handlers attached
-
-### Pressure Data Updates
-- Replace PMTiles files in `public/data/` following naming convention
-- Update attribution in style.json sources with new date
-- Verify pressure range matches color-relief scale (980-1040 hPa)
-- Test time slider functionality across all hours
-
-### Styling Pressure Visualizations
-- Color-relief uses `["elevation"]` for raster-dem sources
-- Vector layers use `["get", "prmsl"]` for property access
-- Major isobars: multiples of 20 hPa get emphasized styling
-- Consider layer ordering: mono → pressure-relief → isobar → isobar-label
-
-### UI Component Modifications
-- TimeSlider responsive breakpoints: 1024px, 768px, 480px, 320px
-- Popup styling in `src/styles/popup.css` with Japanese text support
-- MapView handles time state and passes down to TimeSlider
-- CSS modules pattern: each component has dedicated stylesheet
+## GitHub Pages Deployment
+- Base path configured in `vite.config.ts`: `/weatherlayer-particle-display-map/`
+- Automated deployment via GitHub Actions on main branch push
+- Uses `gh-pages` package for dist folder deployment
