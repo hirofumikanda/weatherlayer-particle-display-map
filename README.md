@@ -1,6 +1,6 @@
 # WeatherLayer Particle Display Map
 
-WeatherLayers GLライブラリを使用した、インタラクティブな風のパーティクル可視化マップアプリケーションです。WeatherLayers GLのVector画像に準拠したPNG画像をドラッグ&ドロップで読み込み、リアルタイムでパーティクルアニメーションを表示できます。
+WeatherLayers GLライブラリを使用した、インタラクティブな風のパーティクル可視化マップアプリケーションです。WeatherLayers GLのdata formatに準拠したPNG画像をドラッグ&ドロップで読み込み、リアルタイムでパーティクルアニメーションを表示できます。
 
 ## 🌟 主な機能
 
@@ -50,7 +50,7 @@ npm run dev
 ## 📖 使い方
 
 1. **アプリケーションを開く**: ブラウザでデモサイトまたはローカル開発サーバーにアクセス
-2. **PNGを読み込む**: WeatherLayers GLのVector画像形式のPNG画像を地図上にドラッグ&ドロップ
+2. **PNGを読み込む**: WeatherLayers GLのdata formatのPNG画像を地図上にドラッグ&ドロップ
 3. **パラメータを調整**: 左上のコントロールパネルでパーティクルの表示を調整
 
 ## 📁 プロジェクト構造
@@ -75,7 +75,7 @@ public/
 ## 🎯 対応データ形式
 
 - **ファイル形式**: PNG画像
-- **データ形式**: WeatherLayers GL Vector画像形式
+- **データ形式**: WeatherLayers GL data formatに準拠した画像形式
 - **チャンネル**: R（東西ベクトル成分値）、G（南北ベクトル成分値）
 - 詳細はWeatherLayers GLの[supported-data-formats](https://docs.weatherlayers.com/weatherlayers-gl/data-sources#supported-data-formats)を参照
 

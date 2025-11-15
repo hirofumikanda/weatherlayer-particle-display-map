@@ -150,7 +150,7 @@ const MapView: React.FC = () => {
           fontSize: '14px',
           maxWidth: '300px'
         }}>
-          WeatherLayers GLのVector画像形式のPNG画像を地図上にドラッグ&ドロップしてParticleレイヤーを表示できます。
+          WeatherLayers GLのdata formatのPNG画像を地図上にドラッグ&ドロップしてParticleレイヤーを表示できます。
         </div>
       )}
     </div>
