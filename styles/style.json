@@ -1,21 +1,21 @@
 {
   "version": 8,
   "sources": {
-    "mono": {
+    "seamlessphoto": {
       "type": "raster",
-      "tiles": ["https://tile.mierune.co.jp/mierune_mono/{z}/{x}/{y}.png"],
-      "minzoom": 0,
+      "tiles": ["https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg"],
+      "minzoom": 2,
       "maxzoom": 18,
-      "attribution": "<a href=\"https://mierune.co.jp\">MIERUNE Inc.</a> <a href=\"https://www.openmaptiles.org/\" target=\"_blank\">&copy; OpenMapTiles</a> <a href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\">&copy; OpenStreetMap contributors</a>"
+      "attribution": "<a href=\"https://maps.gsi.go.jp/development/ichiran.html#nendo\">地理院タイル</a>"
     }
   },
   "glyphs": "font/{fontstack}/{range}.pbf",
   "layers": [
     {
-      "id": "mono",
+      "id": "seamlessphoto",
       "type": "raster",
-      "source": "mono",
-      "minzoom": 0
+      "source": "seamlessphoto",
+      "minzoom": 2
     }
   ]
 }
