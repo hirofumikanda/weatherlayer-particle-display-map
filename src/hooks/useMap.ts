@@ -92,8 +92,8 @@ export const useMap = () => {
     }
   }, [createParticleLayer]);
   
-  // 風レイヤーを更新する関数
-  const updateWindLayer = useCallback(async (imageFile: File) => {
+  // ParticleLayerを更新する関数
+  const updateParticleLayer = useCallback(async (imageFile: File) => {
     const map = mapRef.current;
     if (!map || !deckOverlayRef.current) return;
 
@@ -111,7 +111,7 @@ export const useMap = () => {
         layers: [particleLayer]
       });
     } catch (error) {
-      console.error('Failed to load wind data:', error);
+      console.error('Failed to load image data:', error);
       throw error;
     }
   }, [createParticleLayer]);
@@ -123,7 +123,7 @@ export const useMap = () => {
       style: "styles/style.json",
       center: [139.8, 35.9],
       zoom: 2,
-      minZoom: 0,
+      minZoom: 2,
       pitch: 0,
       hash: true,
     });
@@ -154,7 +154,7 @@ export const useMap = () => {
   return { 
     mapContainerRef, 
     mapRef,
-    updateWindLayer,
+    updateParticleLayer,
     updateParticleParams
   };
 };

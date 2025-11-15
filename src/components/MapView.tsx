@@ -5,7 +5,7 @@ import type { ParticleParams } from "./ParticleControls";
 import "../styles/map.css";
 
 const MapView: React.FC = () => {
-  const { mapContainerRef, updateWindLayer, updateParticleParams } = useMap();
+  const { mapContainerRef, updateParticleLayer, updateParticleParams } = useMap();
   const [isDragOver, setIsDragOver] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -43,16 +43,16 @@ const MapView: React.FC = () => {
     setIsLoading(true);
 
     try {
-      await updateWindLayer(file);
+      await updateParticleLayer(file);
       setHasParticleLayer(true);
       setErrorMessage(null);
     } catch (error) {
-      console.error('Wind layer update failed:', error);
+      console.error('Particle layer update failed:', error);
       setErrorMessage('画像の読み込みに失敗しました。');
     } finally {
       setIsLoading(false);
     }
-  }, [updateWindLayer]);
+  }, [updateParticleLayer]);
 
   const handleParticleParamsChange = useCallback((params: ParticleParams) => {
     updateParticleParams(params);
