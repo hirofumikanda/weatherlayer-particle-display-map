@@ -134,6 +134,9 @@ export const useMap = () => {
 
     // 地図がロードされた後にDeckGLオーバーレイを初期化
     map.on('load', () => {
+      // Globeプロジェクションに設定
+      map.setProjection({ type: 'globe' });
+      
       // DeckGL オーバーレイを初期化
       const deckOverlay = new MapboxOverlay({
         interleaved: true,
